@@ -2,7 +2,7 @@
   "name": "The Great Diamond",
   "short_name": "Treasure",
   "description": "A reading treasure hunt — dig at the X, read the clue, find the great diamond!",
-  "start_url": "./The Great Diamond.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

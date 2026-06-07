@@ -1,8 +1,8 @@
 /* The Great Diamond — service worker (offline support) */
-const CACHE = 'great-diamond-v1';
+const CACHE = 'great-diamond-v2';
 const CORE = [
   './',
-  './The Great Diamond.html',
+  './index.html',
   './th-sprites.js',
   './th-landmarks.js',
   './th-world.js',
