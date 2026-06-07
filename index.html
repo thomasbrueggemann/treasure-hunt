@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>The Great Diamond — Treasure Hunt</title>
+
+<!-- ===== Install / home-screen (PWA) ===== -->
+<meta name="theme-color" content="#1a2a1e" />
+<link rel="manifest" href="manifest.webmanifest" />
+<!-- favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+<!-- iOS / iPadOS add-to-home-screen -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Treasure" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2c1c10;
+    --parch:#e9d8a6;
+    --parch-d:#d8c489;
+    --wood:#6b4322;
+    --wood-d:#4a2c14;
+    --gold:#caa24a;
+    --dia:#5fd3e0;
+    --panel:#27331f;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; background:#10180f; }
+  body{
+    font-family:'Andika', 'Segoe UI', sans-serif;
+    color:var(--ink);
+    -webkit-user-select:none; user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:none;
+  }
+  #game{ position:fixed; inset:0; display:block; image-rendering:pixelated; background:#1a2a1e; }
+
+  /* ---------- top HUD ---------- */
+  #hud{
+    position:fixed; top:0; left:0; right:0;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:calc(8px + env(safe-area-inset-top)) 10px 0;
+    pointer-events:none; z-index:20;
+  }
+  .panel{
+    background:var(--panel);
+    border:3px solid var(--wood-d);
+    box-shadow:0 3px 0 #0006, inset 0 0 0 2px #ffffff14;
+    color:#f3ead0;
+    padding:9px 14px;
+    image-rendering:pixelated;
+  }
+  #hud-dia-wrap{ display:flex; align-items:center; gap:11px; font-size:28px; letter-spacing:1px; }
+  #hud-dia-wrap canvas{ image-rendering:pixelated; }
+  #hud-dia-wrap.pop{ animation:pop .32s ease; }
+  @keyframes pop{ 0%{ transform:scale(1);} 35%{ transform:scale(1.22);} 100%{ transform:scale(1);} }
+
+  #hud-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  #seek{
+    display:flex; align-items:center; gap:11px; font-size:18px; color:#f3ead0;
+  }
+  #seek .lbl{ color:#c9b67e; font-size:16px; white-space:nowrap; }
+  #seek-word{ color:#ffe08a; font-size:26px; letter-spacing:1px; }
+  #hud-step{ font-size:18px; color:#bfd3a8; }
+  #seek-row2{ display:flex; align-items:center; gap:12px; }
+
+  #mute{
+    pointer-events:auto; cursor:pointer;
+    width:46px; height:46px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; color:#ffe08a; background:var(--panel);
+    border:3px solid var(--wood-d); box-shadow:0 3px 0 #0006;
+  }
+  #mute.off{ color:#9a8c66; }
+
+  /* ---------- controls ---------- */
+  #controls{ position:fixed; inset:0; z-index:15; pointer-events:none; }
+  #joy{
+    position:fixed; left:calc(20px + env(safe-area-inset-left));
+    bottom:calc(28px + env(safe-area-inset-bottom));
+    width:172px; height:172px; border-radius:50%;
+    background:radial-gradient(circle at 50% 42%, #3a4a2e, #222c1b);
+    border:5px solid var(--wood-d);
+    box-shadow:0 5px 0 #0007, inset 0 0 0 3px #ffffff10;
+    pointer-events:auto; touch-action:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #joy::before{
+    content:''; position:absolute; width:104px; height:104px; border-radius:50%;
+    border:2px dashed #ffffff22;
+  }
+  #joy-knob{
+    width:80px; height:80px; border-radius:50%;
+    background:radial-gradient(circle at 42% 38%, #caa24a, #8a6a2a);
+    border:4px solid var(--wood-d);
+    box-shadow:0 3px 0 #0006, inset 0 2px 0 #ffffff44;
+    transition:transform .04s linear;
+  }
+  #joy.on #joy-knob{ box-shadow:0 1px 0 #0006, inset 0 2px 0 #ffffff55; }
+
+  #dig{
+    position:fixed; right:calc(22px + env(safe-area-inset-right));
+    bottom:calc(42px + env(safe-area-inset-bottom));
+    width:140px; height:140px; border-radius:50%;
+    background:radial-gradient(circle at 46% 38%, #8a5a3b, #5b3a1d);
+    border:5px solid var(--wood-d);
+    box-shadow:0 6px 0 #0007, inset 0 0 0 3px #ffffff12;
+    color:#ffe9c2; font-family:'Andika','Segoe UI',sans-serif; font-size:22px; font-weight:700;
+    letter-spacing:1px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    pointer-events:auto; touch-action:none; cursor:pointer;
+  }
+  #dig:active{ transform:translateY(3px); box-shadow:0 2px 0 #0007, inset 0 0 0 3px #ffffff12; }
+  #dig .ic{ font-size:34px; line-height:1; }
+
+  .hint{
+    position:fixed; bottom:6px; left:50%; transform:translateX(-50%);
+    font-size:9px; color:#ffffff66; z-index:14; text-align:center;
+    pointer-events:none; letter-spacing:1px;
+  }
+  @media (hover:none){ .hint{ display:none; } }
+
+  /* ---------- toast ---------- */
+  #toast{
+    position:fixed; top:42%; left:50%; transform:translate(-50%,-6px);
+    background:#00000099; color:#f3ead0; padding:8px 14px; font-size:12px;
+    border:2px solid #ffffff22; opacity:0; transition:opacity .2s, transform .2s;
+    z-index:30; pointer-events:none; letter-spacing:1px;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%,0); }
+
+  /* ---------- note (torn paper) ---------- */
+  #note, #win{
+    position:fixed; inset:0; z-index:40; display:none;
+    align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(circle at 50% 40%, #0006, #000a);
+    backdrop-filter:blur(1px);
+  }
+  #note.show, #win.show{ display:flex; animation:fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; } to{ opacity:1; } }
+
+  .scrap{
+    position:relative; max-width:460px; width:100%;
+    background:
+      repeating-linear-gradient(0deg,#0000 0 22px,#00000008 22px 23px),
+      linear-gradient(135deg,#efe2bb,#e3d099);
+    color:#3a2a16; padding:30px 26px 26px; text-align:center;
+    box-shadow:0 14px 34px #000a, inset 0 0 40px #0000001a;
+    transform:rotate(-1.4deg);
+    clip-path:polygon(2% 4%, 16% 1%, 33% 5%, 52% 1%, 71% 4%, 88% 1%, 99% 6%,
+      97% 26%, 100% 49%, 97% 72%, 100% 94%, 84% 98%, 63% 95%, 44% 99%,
+      24% 96%, 7% 99%, 1% 80%, 3% 55%, 0% 32%, 2% 14%);
+  }
+  .scrap::after{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at 78% 84%, #7a5a2e33, #0000 40%),
+               radial-gradient(circle at 14% 22%, #7a5a2e22, #0000 36%);
+    pointer-events:none;
+  }
+  .note-kicker{ font-size:30px; letter-spacing:2px; color:#8a6a2a; text-transform:uppercase; margin-bottom:16px; }
+  .note-word{
+    font-size:74px; font-weight:700; line-height:1.05; letter-spacing:2px;
+    color:#2c1c10; text-shadow:3px 3px 0 #caa24a66; margin:8px 0 18px;
+    word-break:break-word;
+  }
+  .note-word.small{ font-size:48px; }
+  .note-sub{ font-size:26px; line-height:1.6; color:#4a3a22; }
+  .note-prog{ font-size:18px; color:#8a6a2a; }
+  .btn{
+    margin-top:24px; cursor:pointer; pointer-events:auto;
+    font-family:'Andika','Segoe UI',sans-serif; font-size:22px; font-weight:700; letter-spacing:1px;
+    color:#f3ead0; background:var(--wood); border:3px solid var(--wood-d);
+    box-shadow:0 4px 0 #0006; padding:15px 32px;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #0006; }
+
+  /* ---------- win ---------- */
+  .win-card{
+    position:relative; max-width:420px; width:100%; text-align:center;
+    background:linear-gradient(160deg,#27331f,#1c2618);
+    border:4px solid var(--gold);
+    box-shadow:0 16px 40px #000b, inset 0 0 0 2px #ffffff12;
+    padding:32px 28px;
+  }
+  .win-title{ font-size:54px; color:#ffe08a; letter-spacing:2px; line-height:1.2; text-shadow:3px 3px 0 #00000080; }
+  .win-sub{ font-size:20px; color:#d8e2c8; line-height:1.7; margin-top:16px; }
+  .win-dia{ display:flex; align-items:center; justify-content:center; gap:12px; margin:22px 0 4px; font-size:30px; color:#bff3f8; }
+  .win-dia canvas{ image-rendering:pixelated; }
+  #win .btn{ margin-top:24px; background:var(--gold); color:#3a2a10; border-color:#8a6a2a; }
+
+  .chest{ font-size:54px; line-height:1; margin-bottom:6px; }
+</style>
+</head>
+<body>
+  <template id="__bundler_thumbnail" data-bg-color="#1a2a1e">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="800" fill="#3a7d44"/>
+      <g transform="translate(600 400)">
+        <polygon points="0,-150 130,-40 0,170 -130,-40" fill="#7fe0ec"/>
+        <polygon points="0,-150 130,-40 0,170" fill="#5fd3e0"/>
+        <polygon points="-130,-40 130,-40 0,40" fill="#bff3f8"/>
+        <g stroke="#caa24a" stroke-width="34" stroke-linecap="round">
+          <line x1="-360" y1="-220" x2="-250" y2="-110"/>
+          <line x1="-250" y1="-220" x2="-360" y2="-110"/>
+        </g>
+        <g stroke="#caa24a" stroke-width="34" stroke-linecap="round">
+          <line x1="250" y1="120" x2="360" y2="230"/>
+          <line x1="360" y1="120" x2="250" y2="230"/>
+        </g>
+      </g>
+    </svg>
+  </template>
+
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="panel" id="hud-dia-wrap">
+      <canvas id="dia-icon" width="27" height="24"></canvas>
+      <span id="hud-dia">0</span>
+    </div>
+    <div id="hud-right">
+      <div class="panel" id="seek">
+        <span class="lbl">GO TO</span>
+        <span id="seek-word">—</span>
+      </div>
+      <div id="seek-row2">
+        <span class="panel" id="hud-step" style="padding:3px 8px;">1 / 10</span>
+        <div id="mute">♪</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div id="joy"><div id="joy-knob"></div></div>
+    <button id="dig"><span class="ic">⛏</span><span>DIG</span></button>
+  </div>
+  <div class="hint">ARROWS = MOVE &nbsp;·&nbsp; SPACE = DIG</div>
+
+  <div id="toast"></div>
+
+  <div id="note">
+    <div class="scrap">
+      <div id="note-body"></div>
+      <button class="btn" id="note-close">OK</button>
+    </div>
+  </div>
+
+  <div id="win">
+    <div class="win-card">
+      <div class="chest">💎</div>
+      <div class="win-title">YOU WON!</div>
+      <div class="win-sub">YOU GOT THE BIG GEM!</div>
+      <div class="win-dia"><canvas id="win-dia-icon" width="36" height="32"></canvas><span id="win-count">0</span> GEMS</div>
+      <button class="btn" id="win-replay">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <script src="th-sprites.js"></script>
+  <script src="th-landmarks.js"></script>
+  <script src="th-world.js"></script>
+  <script src="th-audio.js"></script>
+  <script>
+    // draw the little diamond icons in HUD / win using the sprite
+    function paintIcon(id, scale){
+      const c=document.getElementById(id); if(!c)return;
+      const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+      window.THS.drawDiamond(x,0,0,scale||2);
+    }
+    paintIcon('dia-icon', 3); paintIcon('win-dia-icon', 4);
+  </script>
+  <script src="th-game.js"></script>
+  <script>
+    // Register the service worker so the game works offline once installed.
+    // Only over http(s) — skipped when opening the raw file (file://).
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
