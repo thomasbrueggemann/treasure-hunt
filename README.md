@@ -1,9 +1,12 @@
 # The Great Diamond — Treasure Hunt
 
-A tiny, mobile-friendly **reading treasure hunt** game. Dig at the X, read the
-clue on the torn note, then head to the next landmark — find all the gems and
-claim the great diamond! Built as a zero-dependency, installable
-[PWA](https://web.dev/progressive-web-apps/) that runs fully offline.
+A tiny, mobile-friendly **reading treasure hunt** game — a playful adventure
+made for **early readers**. Dig at the X, read the clue on the torn note, then
+head to the next landmark — find all the gems and claim the great diamond! Big
+friendly words, simple one-word clues, and chunky touch controls keep it
+approachable for little hands and new readers. Built as a zero-dependency,
+installable [PWA](https://web.dev/progressive-web-apps/) that runs fully
+offline.
 
 ## Play
 
