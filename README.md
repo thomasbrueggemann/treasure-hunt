@@ -1,6 +1,8 @@
-![The Great Diamond — Treasure Hunt](header.png)
+[![The Great Diamond — Treasure Hunt](header.png)](https://thomasbrueggemann.github.io/treasure-hunt/)
 
 # The Great Diamond — Treasure Hunt
+
+### 👉 [**Play it now**](https://thomasbrueggemann.github.io/treasure-hunt/) 💎
 
 A tiny, mobile-friendly **reading treasure hunt** game — a playful adventure
 made for **early readers**. Dig at the X, read the clue on the torn note, then
