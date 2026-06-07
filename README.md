@@ -1,3 +1,5 @@
+![The Great Diamond — Treasure Hunt](header.png)
+
 # The Great Diamond — Treasure Hunt
 
 A tiny, mobile-friendly **reading treasure hunt** game — a playful adventure
